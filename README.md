@@ -12,6 +12,8 @@
 - **Create GameObject From Components**: Generate a new GameObject containing selected components from the current selection.
 - **Dedicated Inspector Window**: Work with GameObjects in a customizable inspector window without affecting Unity's default Inspector.
 
+<img width="795" height="849" alt="image" src="https://github.com/user-attachments/assets/403ef025-71b4-410b-9e61-a6387a282cf2" />
+
 ## Installation
 
 To install, paste the following URL into Unity's **Package Manager**:
