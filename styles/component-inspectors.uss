@@ -1,0 +1,44 @@
+.component-element {
+    margin-bottom: 0;
+}
+
+.component-element > .title-bar {
+    flex-direction: row;
+    align-items: center;
+}
+
+.component-element > .title-bar > .native-component-header {
+    flex-grow: 1;
+}
+
+.component-element > .title-bar > .sub-component-header {
+    height: 22px;
+    
+    flex-direction: row;
+    align-items: center;
+
+    border-top-width: 1px;
+    border-top-color: black;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(53, 53, 53);
+
+    background-color: rgb(62, 62, 62);
+}
+
+.sub-component-header > .util-button {
+    width: 17px;
+    height: 17px;
+
+    margin: 0;
+    margin-right: 2px;
+    padding: 0;
+
+    background-color: transparent;
+
+    border-radius: 3px;
+    border-color: transparent;
+}
+
+.sub-component-header > .util-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

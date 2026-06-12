@@ -1,0 +1,28 @@
+.header {
+    height: 25px;
+    border-top-width: 1px;
+    border-top-color: black;
+}
+
+.header > .toast {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    opacity: 0;
+    translate: 20px 0;
+
+    transition-duration: 0.3s;
+    transition-property: translate, opacity;
+    transition-timing-function: ease-out-sine;
+}
+
+.header > .toast.show {
+    opacity: 1;
+    translate: 0 0;
+}
