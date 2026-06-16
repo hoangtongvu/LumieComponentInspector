@@ -39,6 +39,7 @@ partial class LumieCI : EditorWindow
 
             _scrollView.RegisterCallback<GeometryChangedEvent>(OnLayoutReady);
             _scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(OnScrollViewResized);
+            _elementAboveTarget.RegisterCallback<GeometryChangedEvent>(OnElementAboveTargetResized);
         }
 
         private void OnScrollViewResized(GeometryChangedEvent evt)
@@ -52,7 +53,6 @@ partial class LumieCI : EditorWindow
             _scrollView.verticalScroller.valueChanged += OnScroll;
 
             _stickyOriginalIndex = _scrollView.IndexOf(_stickyTarget);
-            _stickyTriggerOffset = _elementAboveTarget.resolvedStyle.height;
 
             // Create a spacer matching the sticky element's height
             _spacer = new VisualElement();
@@ -60,6 +60,13 @@ partial class LumieCI : EditorWindow
             _spacer.style.display = DisplayStyle.None;
 
             _scrollView.contentContainer.Insert(_stickyOriginalIndex + 1, _spacer);
+        }
+
+        private void OnElementAboveTargetResized(GeometryChangedEvent evt)
+        {
+            if (evt.newRect.height <= 0) return;
+
+            _stickyTriggerOffset = evt.newRect.height;
         }
 
         private void OnScroll(float scrollY)
