@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: ComponentQuickView::LCIConfigsSO
   ComponentInspectorsStyleSheet: {fileID: 7433441132597879392, guid: d11a6d171967c694592abd0e5d41d895, type: 3}
   ComponentToolbarStyleSheet: {fileID: 7433441132597879392, guid: 1032887f409ea3045a13ecb6296da6f9, type: 3}
-  ComponentHeaderStyleSheet: {fileID: 7433441132597879392, guid: 404ee897067d5cd4296093cebf4a370b, type: 3}
+  ActionToolbarStyleSheet: {fileID: 7433441132597879392, guid: 404ee897067d5cd4296093cebf4a370b, type: 3}

@@ -43,19 +43,28 @@ internal partial class LumieCI : EditorWindow
         rootVisualElement.style.opacity = 0;
         rootVisualElement.style.flexDirection = FlexDirection.Column;
 
-        _unityHeader = new(this);
-        rootVisualElement.Add(_unityHeader);
+        _rootScrollView = new(this);
+        rootVisualElement.Add(_rootScrollView);
 
-        _header = new(this);
-        rootVisualElement.Add(_header);
+        _unityHeader = new(this);
+        _rootScrollView.Add(_unityHeader);
+
+        _toolbarsHolder = new(this);
+        _rootScrollView.Add(_toolbarsHolder);
+
+        _actionToolbar = new(this);
+        _toolbarsHolder.Add(_actionToolbar);
 
         _componentToolBar = new(this);
-        rootVisualElement.Add(_componentToolBar);
+        _toolbarsHolder.Add(_componentToolBar);
 
         _componentInspectors = new(this);
-        rootVisualElement.Add(_componentInspectors);
+        _rootScrollView.Add(_componentInspectors);
 
         _lockInspectorButton = new(this);
+
+        _stickyHeader = new(this, _rootScrollView, _toolbarsHolder, _unityHeader);
+        rootVisualElement.Add(_stickyHeader);  // added LAST = paints on top
     }
 
     private void OnSelectionChange()
@@ -133,16 +142,7 @@ internal partial class LumieCI : EditorWindow
 
     private void RepaintWindow()
     {
-        bool isTargetGameObject = _targetGO;
-
-        _header.style.display = isTargetGameObject
-            ? DisplayStyle.Flex
-            : DisplayStyle.None;
-
-        _componentToolBar.style.display = isTargetGameObject
-            ? DisplayStyle.Flex
-            : DisplayStyle.None;
-
+        _actionToolbar.Refresh();
         _componentToolBar.Refresh();
         _componentInspectors.Refresh();
         _lockInspectorButton.AttachButton();

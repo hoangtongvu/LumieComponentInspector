@@ -39,8 +39,13 @@ partial class LumieCI : EditorWindow
             this.Clear();
 
             var target = _lci._targetGO;
-            if (!target) return;
+            if (!target)
+            {
+                this.style.display = DisplayStyle.None;
+                return;
+            }
 
+            this.style.display = DisplayStyle.Flex;
             this.Add(CreateToggleAllButton());
 
             var components = target.GetComponents<Component>();

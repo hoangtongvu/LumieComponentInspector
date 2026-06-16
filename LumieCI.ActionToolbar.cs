@@ -7,9 +7,9 @@ namespace LumieComponentInspector;
 
 partial class LumieCI : EditorWindow
 {
-    private Header _header;
+    private ActionToolbar _actionToolbar;
 
-    private class Header : Toolbar
+    private class ActionToolbar : Toolbar
     {
         private readonly LumieCI _lci;
         private int _headerHeight = 25;
@@ -17,15 +17,15 @@ partial class LumieCI : EditorWindow
         private Label _toast;
         private IVisualElementScheduledItem _hideToastTask;
 
-        public Header(LumieCI lci) : base()
+        public ActionToolbar(LumieCI lci) : base()
         {
             _lci = lci;
-            CreateHeader();
+            CreateActionToolbar();
         }
 
-        private void CreateHeader()
+        private void CreateActionToolbar()
         {
-            this.styleSheets.Add(_lci._inspectorConfigs.ComponentHeaderStyleSheet);
+            this.styleSheets.Add(_lci._inspectorConfigs.ActionToolbarStyleSheet);
             this.AddToClassList("header");
 
             // Copy component values button
@@ -42,6 +42,15 @@ partial class LumieCI : EditorWindow
 
             // Create Toast
             this.Add(CreateToast());
+        }
+
+        public void Refresh()
+        {
+            bool isTargetGameObject = _lci._targetGO;
+
+            this.style.display = isTargetGameObject
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
         }
 
         private Label CreateToast()

@@ -10,6 +10,6 @@ namespace LumieComponentInspector
 
         public StyleSheet ComponentInspectorsStyleSheet;
         public StyleSheet ComponentToolbarStyleSheet;
-        public StyleSheet ComponentHeaderStyleSheet;
+        public StyleSheet ActionToolbarStyleSheet;
     }
 }

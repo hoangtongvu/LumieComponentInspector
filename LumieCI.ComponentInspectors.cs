@@ -9,14 +9,13 @@ partial class LumieCI : EditorWindow
 {
     private ComponentInspectors _componentInspectors;
 
-    private class ComponentInspectors : ScrollView
+    private class ComponentInspectors : VisualElement
     {
         private readonly LumieCI _lci;
 
         public ComponentInspectors(LumieCI lci) : base()
         {
             _lci = lci;
-            this.verticalScrollerVisibility = ScrollerVisibility.AlwaysVisible;
 
             this.styleSheets.Add(_lci._inspectorConfigs.ComponentInspectorsStyleSheet);
         }
