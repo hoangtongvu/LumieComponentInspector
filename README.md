@@ -23,7 +23,7 @@ To install, paste the following URL into Unity's **Package Manager**:
 3. Select **"Add package from git URL..."**.
 4. Enter the following URL:
 ```bash
-https://github.com/hoangtongvu/LumieComponentInspector.git#1.0.0
+https://github.com/hoangtongvu/LumieComponentInspector.git#1.0.1
 ```
 
 ## Getting Started
