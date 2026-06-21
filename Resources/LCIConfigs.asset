@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90ac5a4667d602b479f49192cea2851a, type: 3}
+  m_Script: {fileID: 11500000, guid: 4da4843cab471a74e8e5a7e2da7deeab, type: 3}
   m_Name: LCIConfigs
-  m_EditorClassIdentifier: ComponentQuickView::LCIConfigsSO
-  ComponentInspectorsStyleSheet: {fileID: 7433441132597879392, guid: d11a6d171967c694592abd0e5d41d895, type: 3}
-  ComponentToolbarStyleSheet: {fileID: 7433441132597879392, guid: 1032887f409ea3045a13ecb6296da6f9, type: 3}
-  ActionToolbarStyleSheet: {fileID: 7433441132597879392, guid: 404ee897067d5cd4296093cebf4a370b, type: 3}
+  m_EditorClassIdentifier: LumieComponentInspector::LumieComponentInspector.LCIConfigsSO
+  ComponentInspectorsStyleSheet: {fileID: 7433441132597879392, guid: d1ee483f6f9ea294c805a1678d034e65, type: 3}
+  ComponentToolbarStyleSheet: {fileID: 7433441132597879392, guid: 8dc62264839fd1a4ab6f872d1357847c, type: 3}
+  ActionToolbarStyleSheet: {fileID: 7433441132597879392, guid: f3564c702e107c94483940f48c335026, type: 3}

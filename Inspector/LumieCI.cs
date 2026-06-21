@@ -16,11 +16,13 @@ internal partial class LumieCI
     private LCIConfigsSO _inspectorConfigs;
     private GameObject _targetGO;
 
+    private ScrollView _rootScrollView;
     private VisualElement _inspectorEditorsList;
+    private VisualElement _gameObjInspectorHeader;
 
     private readonly List<Component> _components = new();
-    private readonly Dictionary<Component, ComponentInspectorState> _componentInspectorStates = new();
     private readonly Dictionary<Component, InspectorElement> _component2InspectorMap = new();
+    private readonly Dictionary<Component, ComponentInspectorState> _componentInspectorStates = new();
     private readonly List<Component> _copiedComponents = new();
 
     // first int: id of the game object
@@ -28,7 +30,7 @@ internal partial class LumieCI
     private readonly Dictionary<int, Dictionary<int, ComponentInspectorState>> _cachedInspectorStateByGameObject = new();
 
     [InitializeOnLoadMethod]
-    static void Initialize()
+    static void CreateLumieInstance()
     {
         _instance = new();
     }
@@ -38,10 +40,30 @@ internal partial class LumieCI
         _inspectorConfigs = Resources.Load<LCIConfigsSO>(LCIConfigsSO.DefaultAssetPath);
         Selection.selectionChanged += OnSelectionChanged;
         EditorApplication.hierarchyChanged += OnHierarchyChanged;
+
+        EditorApplication.delayCall += () =>
+        {
+            var unityInspectorWindow = Resources.FindObjectsOfTypeAll<EditorWindow>()
+            .FirstOrDefault(w => w.GetType().Name == anchorEditorWindowName);
+
+            _rootScrollView = unityInspectorWindow.rootVisualElement.Q<ScrollView>(className: "unity-inspector-root-scrollview");
+            var contentContainer = unityInspectorWindow.rootVisualElement.Q<VisualElement>(name: "unity-content-container");
+            _inspectorEditorsList = contentContainer.Q<VisualElement>(className: "unity-inspector-editors-list");
+
+            _stickyHeader = new(this);
+            _stickyHeader.Initialize(_rootScrollView);
+            //_rootScrollView.parent.Add(_stickyHeader);
+        };
     }
 
     private void OnSelectionChanged()
     {
+        _stickyHeader.UnBind();
+        if (!Selection.activeGameObject)
+        {
+            _stickyHeader.RemoveFromHierarchy();
+        }
+
         EditorApplication.delayCall += OnSelectionChanged1;
     }
 
@@ -49,10 +71,11 @@ internal partial class LumieCI
     {
         if (!_targetGO) return;
 
+        _stickyHeader.UnBind();
         InitComponentList();
         InitInspectorStates();
 
-        _componentToolBar.Refresh();
+        _componentToolbar.Refresh();
     }
 
     private void OnSelectionChanged1()
@@ -67,7 +90,7 @@ internal partial class LumieCI
         InitComponentList();
         InitInspectorStates();
 
-        _componentToolBar.Refresh();
+        _componentToolbar.Refresh();
     }
 
     private void SaveInspectorStates()
@@ -79,6 +102,39 @@ internal partial class LumieCI
             temp.Add(kVPair.Key.GetEntityId(), kVPair.Value);
 
         _cachedInspectorStateByGameObject[_targetGO.GetEntityId()] = temp;
+    }
+
+    private void InitComponentList()
+    {
+        _components.Clear();
+        _component2InspectorMap.Clear();
+
+        var editorField = typeof(InspectorElement).GetField("m_Editor", BindingFlags.Instance | BindingFlags.NonPublic);
+        var inspectors = _inspectorEditorsList.Query<InspectorElement>().ToList();
+
+        foreach (var inspectorElement in inspectors)
+        {
+            bool isHeader = inspectorElement.parent.ClassListContains("game-object-inspector");
+            if (isHeader) continue;
+
+            var editor = (Editor)editorField.GetValue(inspectorElement);
+            var editorTarget = editor.target;
+
+            if (editorTarget is not Component component) continue;
+
+            _components.Add(component);
+            _component2InspectorMap.Add(component, inspectorElement);
+        }
+
+        // Move these logic to another function
+        _gameObjInspectorHeader = _inspectorEditorsList.Q<VisualElement>(className: "game-object-inspector");
+        var headerIndex = _inspectorEditorsList.IndexOf(_gameObjInspectorHeader);
+
+        TryInitToolbarsHolder();
+        _inspectorEditorsList.Insert(headerIndex + 1, _toolbarsHolder);
+
+        _stickyHeader.Bind(_toolbarsHolder, _gameObjInspectorHeader);
+        _rootScrollView.parent.Add(_stickyHeader);
     }
 
     private void InitInspectorStates()
@@ -105,52 +161,6 @@ internal partial class LumieCI
             _componentInspectorStates[c] = state;
             SetSelectedSingleComponent(c, state.IsSelected);
         }
-    }
-
-    private void InitComponentList()
-    {
-        _components.Clear();
-        _component2InspectorMap.Clear();
-
-        // TODO: cache these elements
-        var unityInspectorWindow = Resources.FindObjectsOfTypeAll<EditorWindow>()
-            .FirstOrDefault(w => w.GetType().Name == anchorEditorWindowName);
-
-        var contentContainer = unityInspectorWindow.rootVisualElement.Q<VisualElement>(name: "unity-content-container");
-        _inspectorEditorsList = contentContainer.Q<VisualElement>(className: "unity-inspector-editors-list");
-
-        var gameObjInspector = _inspectorEditorsList.Q<VisualElement>(className: "game-object-inspector");
-        var gameObjInspectorIndex = _inspectorEditorsList.IndexOf(gameObjInspector);
-
-        var editorField = typeof(InspectorElement).GetField("m_Editor", BindingFlags.Instance | BindingFlags.NonPublic);
-        var inspectors = _inspectorEditorsList.Query<InspectorElement>().ToList();
-
-        foreach (var inspectorElement in inspectors)
-        {
-            if (inspectorElement.parent.ClassListContains("game-object-inspector")) continue;
-
-            var editor = (Editor)editorField.GetValue(inspectorElement);
-            var editorTarget = editor.target;
-
-            if (editorTarget is not Component component) continue;
-
-            _components.Add(component);
-            _component2InspectorMap.Add(component, inspectorElement);
-        }
-
-        // TODO: Move this logic else where
-        if (_toolbarsHolder == null)
-        {
-            _toolbarsHolder = new(this);
-
-            _actionToolbar = new(this);
-            _toolbarsHolder.Add(_actionToolbar);
-
-            _componentToolBar = new(this);
-            _toolbarsHolder.Add(_componentToolBar);
-        }
-
-        _inspectorEditorsList.Insert(gameObjInspectorIndex + 1, _toolbarsHolder);
     }
 
     private void ToggleSelectedSingleComponent(Component c)

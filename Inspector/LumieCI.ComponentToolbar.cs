@@ -7,7 +7,7 @@ namespace LumieComponentInspector.Inspector;
 
 partial class LumieCI
 {
-    private ComponentToolbar _componentToolBar;
+    private ComponentToolbar _componentToolbar;
 
     private class ComponentToolbar : VisualElement
     {
