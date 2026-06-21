@@ -126,6 +126,16 @@ partial class LumieCI
 
             button.clicked += () => ToggleSelectedSingleComponent(c);
 
+            button.RegisterCallback<MouseDownEvent>(evt =>
+            {
+                if (evt.button != 1) return; // Right mouse button
+
+                var mouseRect = new Rect(Event.current.mousePosition, Vector2.zero);
+                EditorContextMenuUtil.Show(mouseRect, c);
+
+                evt.StopPropagation();
+            });
+
             return button;
         }
 
