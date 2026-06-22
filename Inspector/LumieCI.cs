@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -8,9 +9,13 @@ using UnityEngine.UIElements;
 
 namespace LumieComponentInspector.Inspector;
 
-internal partial class LumieCI
+internal partial class LumieCI : IDisposable
 {
     private static LumieCI _instance;
+
+    const string MenuPath = "Tools/LumieCI";
+    const string PrefKey = "LumieCI.Enabled";
+
     const string anchorEditorWindowName = "InspectorWindow";
 
     private LCIConfigsSO _inspectorConfigs;
@@ -29,7 +34,44 @@ internal partial class LumieCI
     // second int: id of the component
     private readonly Dictionary<int, Dictionary<int, ComponentInspectorState>> _cachedInspectorStateByGameObject = new();
 
+    [MenuItem(MenuPath)]
+    static void Toggle()
+    {
+        bool enabled = !EditorPrefs.GetBool(PrefKey, false);
+        EditorPrefs.SetBool(PrefKey, enabled);
+
+        Menu.SetChecked(MenuPath, enabled);
+
+        if (enabled)
+        {
+            if (_instance == null)
+                CreateLumieInstance();
+        }
+        else
+        {
+            _instance?.Dispose();
+        }
+    }
+
+    [MenuItem(MenuPath, true)]
+    static bool ValidateToggle()
+    {
+        Menu.SetChecked(
+            MenuPath,
+            EditorPrefs.GetBool(PrefKey, false));
+
+        return true;
+    }
+
     [InitializeOnLoadMethod]
+    static void InitializeOnLoad()
+    {
+        bool enabled = EditorPrefs.GetBool(PrefKey, false);
+        if (!enabled) return;
+
+        CreateLumieInstance();
+    }
+
     static void CreateLumieInstance()
     {
         _instance = new();
@@ -54,6 +96,17 @@ internal partial class LumieCI
             _stickyHeader.Initialize(_rootScrollView);
             //_rootScrollView.parent.Add(_stickyHeader);
         };
+    }
+
+    public void Dispose()
+    {
+        _instance = null;
+
+        _toolbarsHolder?.Dispose();
+        _stickyHeader?.Dispose();
+
+        Selection.selectionChanged -= OnSelectionChanged;
+        EditorApplication.hierarchyChanged -= OnHierarchyChanged;
     }
 
     private void OnSelectionChanged()

@@ -1,4 +1,5 @@
-﻿using UnityEngine.UIElements;
+﻿using System;
+using UnityEngine.UIElements;
 
 namespace LumieComponentInspector.Inspector;
 
@@ -20,13 +21,18 @@ partial class LumieCI
         }
     }
 
-    private class ToolbarsHolder : VisualElement
+    private class ToolbarsHolder : VisualElement, IDisposable
     {
         private readonly LumieCI _lci;
 
         public ToolbarsHolder(LumieCI lci) : base()
         {
             _lci = lci;
+        }
+
+        public void Dispose()
+        {
+            this.RemoveFromHierarchy();
         }
     }
 }

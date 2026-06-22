@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine.UIElements;
 
 namespace LumieComponentInspector.Inspector;
@@ -7,7 +8,7 @@ partial class LumieCI
 {
     private StickyHeader _stickyHeader;
 
-    private class StickyHeader : VisualElement
+    private class StickyHeader : VisualElement, IDisposable
     {
         private readonly LumieCI _lci;
 
@@ -39,6 +40,12 @@ partial class LumieCI
         {
             _scrollView = scrollView;
             _scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(OnScrollViewResized);
+        }
+
+        public void Dispose()
+        {
+            this.UnBind();
+            this.RemoveFromHierarchy();
         }
 
         public void Bind(
