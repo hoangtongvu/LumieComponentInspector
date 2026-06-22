@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -26,7 +24,7 @@ internal partial class LumieCI : IDisposable
     private VisualElement _gameObjInspectorHeader;
 
     private readonly List<Component> _components = new();
-    private readonly Dictionary<Component, InspectorElement> _component2InspectorMap = new();
+    private readonly Component2InspectorMap _component2InspectorMap = new();
     private readonly Dictionary<Component, ComponentInspectorState> _componentInspectorStates = new();
     private readonly List<Component> _copiedComponents = new();
 
@@ -102,6 +100,8 @@ internal partial class LumieCI : IDisposable
     {
         _instance = null;
 
+        _component2InspectorMap.Dispose();
+
         _toolbarsHolder?.Dispose();
         _stickyHeader?.Dispose();
 
@@ -111,39 +111,39 @@ internal partial class LumieCI : IDisposable
 
     private void OnSelectionChanged()
     {
-        _stickyHeader.UnBind();
-        if (!Selection.activeGameObject)
-        {
-            _stickyHeader.RemoveFromHierarchy();
-        }
-
-        EditorApplication.delayCall += OnSelectionChanged1;
-    }
-
-    private void OnHierarchyChanged()
-    {
-        if (!_targetGO) return;
-
-        _stickyHeader.UnBind();
-        InitComponentList();
-        InitInspectorStates();
-
-        _componentToolbar.Refresh();
-    }
-
-    private void OnSelectionChanged1()
-    {
-        EditorApplication.delayCall -= OnSelectionChanged1;
+        _stickyHeader?.UnBind();
 
         SaveInspectorStates();
 
         _targetGO = Selection.activeGameObject;
+        if (!_targetGO)
+        {
+            _stickyHeader.RemoveFromHierarchy();
+            return;
+        }
+
+        InitComponentList();
+        InitInspectorStates();
+
+        _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
+        _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
+        _component2InspectorMap.OnFinishedUpdating += InjectUIElements;
+        _component2InspectorMap.OnFinishedUpdating += () => _componentToolbar?.Refresh();
+    }
+
+    private void OnHierarchyChanged()
+    {
+        _stickyHeader?.UnBind();
+
         if (!_targetGO) return;
 
         InitComponentList();
         InitInspectorStates();
 
-        _componentToolbar.Refresh();
+        _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
+        _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
+        _component2InspectorMap.OnFinishedUpdating += InjectUIElements;
+        _component2InspectorMap.OnFinishedUpdating += () => _componentToolbar?.Refresh();
     }
 
     private void SaveInspectorStates()
@@ -160,34 +160,7 @@ internal partial class LumieCI : IDisposable
     private void InitComponentList()
     {
         _components.Clear();
-        _component2InspectorMap.Clear();
-
-        var editorField = typeof(InspectorElement).GetField("m_Editor", BindingFlags.Instance | BindingFlags.NonPublic);
-        var inspectors = _inspectorEditorsList.Query<InspectorElement>().ToList();
-
-        foreach (var inspectorElement in inspectors)
-        {
-            bool isHeader = inspectorElement.parent.ClassListContains("game-object-inspector");
-            if (isHeader) continue;
-
-            var editor = (Editor)editorField.GetValue(inspectorElement);
-            var editorTarget = editor.target;
-
-            if (editorTarget is not Component component) continue;
-
-            _components.Add(component);
-            _component2InspectorMap.Add(component, inspectorElement);
-        }
-
-        // Move these logic to another function
-        _gameObjInspectorHeader = _inspectorEditorsList.Q<VisualElement>(className: "game-object-inspector");
-        var headerIndex = _inspectorEditorsList.IndexOf(_gameObjInspectorHeader);
-
-        TryInitToolbarsHolder();
-        _inspectorEditorsList.Insert(headerIndex + 1, _toolbarsHolder);
-
-        _stickyHeader.Bind(_toolbarsHolder, _gameObjInspectorHeader);
-        _rootScrollView.parent.Add(_stickyHeader);
+        _components.AddRange(_targetGO.GetComponents<Component>());
     }
 
     private void InitInspectorStates()
@@ -212,6 +185,26 @@ internal partial class LumieCI : IDisposable
             }
 
             _componentInspectorStates[c] = state;
+        }
+    }
+
+    private void InjectUIElements()
+    {
+        _gameObjInspectorHeader = _inspectorEditorsList.Q<VisualElement>(className: "game-object-inspector");
+        var headerIndex = _inspectorEditorsList.IndexOf(_gameObjInspectorHeader);
+
+        TryInitToolbarsHolder();
+        _inspectorEditorsList.Insert(headerIndex + 1, _toolbarsHolder);
+
+        _stickyHeader.Bind(_toolbarsHolder, _gameObjInspectorHeader);
+        _rootScrollView.parent.Add(_stickyHeader);
+    }
+
+    private void SetAllSelectedByStates()
+    {
+        foreach (var c in _components)
+        {
+            var state = _componentInspectorStates[c];
             SetSelectedSingleComponent(c, state.IsSelected);
         }
     }
