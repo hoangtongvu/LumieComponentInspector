@@ -65,6 +65,8 @@ partial class LumieCI
         public void UnBind()
         {
             _scrollView.verticalScroller.valueChanged -= OnScroll;
+            _scrollView.contentViewport.UnregisterCallback<GeometryChangedEvent>(OnScrollViewResized);
+            _elementAboveTarget?.UnregisterCallback<GeometryChangedEvent>(OnElementAboveTargetResized);
         }
 
         private void OnScrollViewResized(GeometryChangedEvent evt)

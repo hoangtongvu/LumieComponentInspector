@@ -48,8 +48,6 @@ internal class Component2InspectorMap : IDisposable
 
     private void TryCancelUpdate()
     {
-        if (!IsUpdating) return;
-
         EditorApplication.update -= Update;
         OnFinishedUpdating = null;
     }
