@@ -88,6 +88,9 @@ partial class LumieCI
             _spacer.style.display = DisplayStyle.None;
 
             _stickyTargetOriginalParent.Insert(_stickyOriginalIndex, _spacer);
+
+            // Manually sync pin state with current scroll position
+            OnScroll(_scrollView.verticalScroller.value);
         }
 
         private void OnElementAboveTargetResized(GeometryChangedEvent evt)
