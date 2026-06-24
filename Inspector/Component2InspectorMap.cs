@@ -25,6 +25,9 @@ internal class Component2InspectorMap : IDisposable
         set => this.value[key] = value;
     }
 
+    public Dictionary<Component, InspectorElement>.KeyCollection Keys => value.Keys;
+    public Dictionary<Component, InspectorElement>.ValueCollection Values => value.Values;
+
     public void Dispose()
     {
         TryCancelUpdate();

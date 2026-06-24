@@ -95,6 +95,8 @@ internal partial class LumieCI : IDisposable
             _stickyHeader = new(this);
             _stickyHeader.Initialize(_rootScrollView);
             //_rootScrollView.parent.Add(_stickyHeader);
+
+            _componentInspectors = new(this);
         };
     }
 
@@ -135,6 +137,7 @@ internal partial class LumieCI : IDisposable
         _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
         _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
         _component2InspectorMap.OnFinishedUpdating += _toolbarsHolder.Enable;
+        _component2InspectorMap.OnFinishedUpdating += _componentInspectors.Refresh;
     }
 
     private void OnHierarchyChanged()
@@ -154,6 +157,7 @@ internal partial class LumieCI : IDisposable
         _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
         _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
         _component2InspectorMap.OnFinishedUpdating += _toolbarsHolder.Enable;
+        _component2InspectorMap.OnFinishedUpdating += _componentInspectors.Refresh;
     }
 
     private void SaveInspectorStates()
