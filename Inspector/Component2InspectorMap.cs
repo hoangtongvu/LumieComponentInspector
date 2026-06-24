@@ -10,9 +10,10 @@ namespace LumieComponentInspector.Inspector;
 
 internal class Component2InspectorMap : IDisposable
 {
-    private Dictionary<Component, InspectorElement> value;
+    private Dictionary<Component, InspectorElement> value = new();
     public bool IsValid = false;
     public bool IsUpdating = false;
+    public event Action OnAfterUpdated;
     public event Action OnFinishedUpdating;
 
     private int _componentCount;
@@ -49,12 +50,13 @@ internal class Component2InspectorMap : IDisposable
     private void TryCancelUpdate()
     {
         EditorApplication.update -= Update;
+        value.Clear();
+        OnAfterUpdated = null;
         OnFinishedUpdating = null;
     }
 
     private void Update()
     {
-        var tempMap = new Dictionary<Component, InspectorElement>();
         var editorField = typeof(InspectorElement).GetField("m_Editor", BindingFlags.Instance | BindingFlags.NonPublic);
         var inspectors = _inspectorEditorsList.Query<InspectorElement>().ToList();
 
@@ -68,17 +70,18 @@ internal class Component2InspectorMap : IDisposable
 
             if (editorTarget is not Component component) continue;
 
-            tempMap.Add(component, inspectorElement);
+            value.TryAdd(component, inspectorElement);
         }
 
-        if (tempMap.Count != _componentCount) return;
+        OnAfterUpdated?.Invoke();
+
+        if (value.Count != _componentCount) return;
 
         EditorApplication.update -= Update;
 
         IsUpdating = false;
         IsValid = true;
 
-        value = tempMap;
         OnFinishedUpdating?.Invoke();
     }
 }

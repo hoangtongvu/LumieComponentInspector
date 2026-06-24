@@ -34,5 +34,15 @@ partial class LumieCI
         {
             this.RemoveFromHierarchy();
         }
+
+        public void Enable()
+        {
+            this.SetEnabled(true);
+        }
+
+        public void Disable()
+        {
+            this.SetEnabled(false);
+        }
     }
 }

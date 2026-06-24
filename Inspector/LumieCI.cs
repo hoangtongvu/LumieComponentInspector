@@ -129,10 +129,12 @@ internal partial class LumieCI : IDisposable
         InitComponentList();
         InitInspectorStates();
 
+        InjectUIElements();
+        _toolbarsHolder.Disable();
+        _componentToolbar?.Refresh();
         _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
         _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
-        _component2InspectorMap.OnFinishedUpdating += InjectUIElements;
-        _component2InspectorMap.OnFinishedUpdating += () => _componentToolbar?.Refresh();
+        _component2InspectorMap.OnFinishedUpdating += _toolbarsHolder.Enable;
     }
 
     private void OnHierarchyChanged()
@@ -146,10 +148,12 @@ internal partial class LumieCI : IDisposable
         InitComponentList();
         InitInspectorStates();
 
+        InjectUIElements();
+        _toolbarsHolder.Disable();
+        _componentToolbar?.Refresh();
         _component2InspectorMap.TriggerUpdate(_inspectorEditorsList, _components.Count);
         _component2InspectorMap.OnFinishedUpdating += SetAllSelectedByStates;
-        _component2InspectorMap.OnFinishedUpdating += InjectUIElements;
-        _component2InspectorMap.OnFinishedUpdating += () => _componentToolbar?.Refresh();
+        _component2InspectorMap.OnFinishedUpdating += _toolbarsHolder.Enable;
     }
 
     private void SaveInspectorStates()
