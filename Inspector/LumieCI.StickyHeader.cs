@@ -39,7 +39,6 @@ partial class LumieCI
         public void Initialize(ScrollView scrollView)
         {
             _scrollView = scrollView;
-            _scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(OnScrollViewResized);
         }
 
         public void Dispose()
@@ -59,6 +58,7 @@ partial class LumieCI
             _elementAboveTarget = elementAboveTarget;
 
             EditorApplication.delayCall += OnLayoutReady;
+            _scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(OnScrollViewResized);
             _elementAboveTarget.RegisterCallback<GeometryChangedEvent>(OnElementAboveTargetResized);
         }
 
