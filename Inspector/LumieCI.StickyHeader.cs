@@ -57,7 +57,7 @@ partial class LumieCI
             _stickyOriginalIndex = _stickyTargetOriginalParent.IndexOf(_stickyTarget);
             _elementAboveTarget = elementAboveTarget;
 
-            EditorApplication.delayCall += OnLayoutReady;
+            OnLayoutReady();
             _scrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(OnScrollViewResized);
             _elementAboveTarget.RegisterCallback<GeometryChangedEvent>(OnElementAboveTargetResized);
         }
@@ -76,8 +76,6 @@ partial class LumieCI
 
         private void OnLayoutReady()
         {
-            EditorApplication.delayCall -= OnLayoutReady;
-
             _scrollView.verticalScroller.valueChanged += OnScroll;
 
             _stickyTriggerOffset = _elementAboveTarget.resolvedStyle.height;
