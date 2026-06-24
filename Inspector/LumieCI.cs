@@ -16,6 +16,7 @@ internal partial class LumieCI : IDisposable
 
     const string anchorEditorWindowName = "InspectorWindow";
 
+    private bool _initialized = false; // Used to prevent OnSelectionChanged or OnHierarchyChanged being called before initialization
     private LCIConfigsSO _inspectorConfigs;
     private GameObject _targetGO;
 
@@ -83,6 +84,7 @@ internal partial class LumieCI : IDisposable
 
         EditorApplication.delayCall += () =>
         {
+            _initialized = true;
             var unityInspectorWindow = Resources.FindObjectsOfTypeAll<EditorWindow>()
             .FirstOrDefault(w => w.GetType().Name == anchorEditorWindowName);
 
@@ -111,6 +113,8 @@ internal partial class LumieCI : IDisposable
 
     private void OnSelectionChanged()
     {
+        if (!_initialized) return;
+
         _stickyHeader?.UnBind();
 
         SaveInspectorStates();
@@ -133,6 +137,8 @@ internal partial class LumieCI : IDisposable
 
     private void OnHierarchyChanged()
     {
+        if (!_initialized) return;
+
         _stickyHeader?.UnBind();
 
         if (!_targetGO) return;
