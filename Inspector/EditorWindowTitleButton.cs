@@ -3,13 +3,13 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace LumieComponentInspector;
+namespace LumieComponentInspector.Inspector;
 
 internal abstract class EditorWindowTitleButton
 {
-    protected readonly LumieCI _lci;
+    protected readonly EditorWindow _lci;
 
-    public EditorWindowTitleButton(LumieCI lci) : base()
+    public EditorWindowTitleButton(EditorWindow lci) : base()
     {
         _lci = lci;
     }

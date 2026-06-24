@@ -3,23 +3,24 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace LumieComponentInspector;
+namespace LumieComponentInspector.Inspector;
 
-partial class LumieCI : EditorWindow
+partial class LumieCI
 {
-    private ComponentToolbar _componentToolBar;
+    private ComponentToolbar _componentToolbar;
 
     private class ComponentToolbar : VisualElement
     {
-        private class ToolBarButton : Button
+        private class ToolbarButton : Button
         {
-            public ToolBarButton() : base()
+            public ToolbarButton() : base()
             {
                 this.AddToClassList("toolbar-button");
             }
         }
 
         private readonly LumieCI _lci;
+
         private bool _toggledAllVisible = true;
 
         public ComponentToolbar(LumieCI lci) : base()
@@ -38,31 +39,16 @@ partial class LumieCI : EditorWindow
         {
             this.Clear();
 
-            var target = _lci._targetGO;
-            if (!target)
-            {
-                this.style.display = DisplayStyle.None;
-                return;
-            }
-
-            this.style.display = DisplayStyle.Flex;
             this.Add(CreateToggleAllButton());
 
-            var components = target.GetComponents<Component>();
+            var components = _lci._components;
             var inspectorStates = _lci._componentInspectorStates;
 
             foreach (var c in components)
             {
-                if (c == null) continue;
+                bool visible = inspectorStates[c].IsSelected;
 
-                bool visible;
-
-                if (inspectorStates.TryGetValue(c, out var state))
-                    visible = state.IsVisible;
-                else
-                    visible = true;
-
-                var button = CreateSingleComponentButton(c, visible);
+                var button = CreateSingleComponentButton(c);
 
                 if (visible)
                 {
@@ -81,9 +67,9 @@ partial class LumieCI : EditorWindow
             this.Add(CreateAddComponentButton());
         }
 
-        private ToolBarButton CreateToggleAllButton()
+        private ToolbarButton CreateToggleAllButton()
         {
-            var button = new ToolBarButton();
+            var button = new ToolbarButton();
 
             var iconSize = new Length(15, LengthUnit.Pixel);
             UpdateToggleAllButtonUI();
@@ -91,8 +77,9 @@ partial class LumieCI : EditorWindow
             button.clicked += () =>
             {
                 _toggledAllVisible = !_toggledAllVisible;
-                _lci.SetAllVisibility(_toggledAllVisible);
+                _lci.SetAllSelected(_toggledAllVisible);
                 UpdateToggleAllButtonUI();
+                Refresh();
             };
 
             void UpdateToggleAllButtonUI()
@@ -118,9 +105,9 @@ partial class LumieCI : EditorWindow
             return button;
         }
 
-        private ToolBarButton CreateSingleComponentButton(Component c, bool visible)
+        private ToolbarButton CreateSingleComponentButton(Component c)
         {
-            var button = new ToolBarButton();
+            var button = new ToolbarButton();
 
             var content = new VisualElement();
             content.AddToClassList("content");
@@ -137,18 +124,25 @@ partial class LumieCI : EditorWindow
             content.Add(label);
             button.Add(content);
 
-            button.clicked += () =>
+            button.clicked += () => ToggleSelectedSingleComponent(c);
+
+            button.RegisterCallback<MouseDownEvent>(evt =>
             {
-                _lci._componentInspectorStates[c].IsVisible = !visible;
-                _lci.RepaintWindow();
-            };
+                if (evt.button != 1) return; // Right mouse button
+
+                var mouseRect = new Rect(Event.current.mousePosition, Vector2.zero);
+                EditorContextMenuUtil.Show(mouseRect, c);
+
+                evt.StopPropagation();
+            });
 
             return button;
         }
 
-        private ToolBarButton CreateAddComponentButton()
+        // TODO: Cache the Reflection types
+        private ToolbarButton CreateAddComponentButton()
         {
-            var button = new ToolBarButton();
+            var button = new ToolbarButton();
             button.style.width = button.style.height;
 
             button.clicked += () =>
@@ -178,6 +172,12 @@ partial class LumieCI : EditorWindow
             );
 
             return button;
+        }
+
+        private void ToggleSelectedSingleComponent(Component c)
+        {
+            _lci.ToggleSelectedSingleComponent(c);
+            Refresh();
         }
     }
 }

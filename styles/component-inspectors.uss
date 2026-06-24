@@ -1,17 +1,16 @@
-.component-element {
-    margin-bottom: 0;
+.editor-element-contains-lci-header {
 }
 
-.component-element > .title-bar {
+.lci-header {
     flex-direction: row;
     align-items: center;
 }
 
-.component-element > .title-bar > .native-component-header {
+.lci-header .native-component-header {
     flex-grow: 1;
 }
 
-.component-element > .title-bar > .sub-component-header {
+.lci-header .sub-component-header {
     height: 22px;
     
     flex-direction: row;
@@ -25,7 +24,7 @@
     background-color: rgb(62, 62, 62);
 }
 
-.sub-component-header > .util-button {
+.sub-component-header .util-button {
     width: 17px;
     height: 17px;
 
@@ -39,6 +38,6 @@
     border-color: transparent;
 }
 
-.sub-component-header > .util-button:hover {
+.sub-component-header .util-button:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }

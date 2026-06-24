@@ -3,9 +3,9 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace LumieComponentInspector;
+namespace LumieComponentInspector.Inspector;
 
-partial class LumieCI : EditorWindow
+partial class LumieCI
 {
     private ActionToolbar _actionToolbar;
 
@@ -42,15 +42,6 @@ partial class LumieCI : EditorWindow
 
             // Create Toast
             this.Add(CreateToast());
-        }
-
-        public void Refresh()
-        {
-            bool isTargetGameObject = _lci._targetGO;
-
-            this.style.display = isTargetGameObject
-                ? DisplayStyle.Flex
-                : DisplayStyle.None;
         }
 
         private Label CreateToast()
@@ -93,7 +84,7 @@ partial class LumieCI : EditorWindow
 
                 foreach (var kvPair in inspectorStates)
                 {
-                    if (!kvPair.Value.IsVisible) continue;
+                    if (!kvPair.Value.IsSelected) continue;
 
                     copiedComponents.Add(kvPair.Key);
                 }
@@ -202,7 +193,7 @@ partial class LumieCI : EditorWindow
 
                 foreach (var kvPair in inspectorStates)
                 {
-                    if (!kvPair.Value.IsVisible) continue;
+                    if (!kvPair.Value.IsSelected) continue;
 
                     var sourceComponent = kvPair.Key;
                     if (!newGO.TryGetComponent(sourceComponent.GetType(), out var destComponent))
