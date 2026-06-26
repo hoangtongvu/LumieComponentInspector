@@ -19,9 +19,73 @@ partial class LumieCI
             }
         }
 
+        private class ComponentButton : ToolbarButton
+        {
+            private readonly ComponentToolbar _componentToolbar;
+            private Component _targetComponent;
+            public VisualElement content = new() { name = "ContentContainer" };
+            public VisualElement header = new() { name = "Header" };
+            public VisualElement body = new() { name = "Body" };
+            public VisualElement footer = new() { name = "Footer" };
+
+            public ComponentButton(ComponentToolbar componentToolbar, Component c) : base()
+            {
+                _componentToolbar = componentToolbar;
+
+                content.AddToClassList("content");
+                content.Add(header);
+                content.Add(body);
+
+
+                BindComponent(c);
+                Add(content);
+                footer.AddToClassList("footer");
+                Add(footer);
+            }
+
+            private void BindComponent(Component c)
+            {
+                _targetComponent = c;
+
+                // Icon
+                var icon = new Image();
+                icon.image = AssetPreview.GetMiniThumbnail(c);
+                header.Add(icon);
+
+                // Label
+                var label = new Label(c.GetType().Name);
+                body.Add(label);
+
+                clicked += () => _componentToolbar.ToggleSelectedSingleComponent(c);
+
+                RegisterCallback<MouseDownEvent>(evt =>
+                {
+                    if (evt.button != 1) return; // Right mouse button
+
+                    var mouseRect = new Rect(Event.current.mousePosition, Vector2.zero);
+                    EditorContextMenuUtil.Show(mouseRect, c);
+
+                    evt.StopPropagation();
+                });
+            }
+
+            public void ShowDropIndicator()
+            {
+                footer.AddToClassList("drop-indicator");
+            }
+
+            public void HideDropIndicator()
+            {
+                footer.RemoveFromClassList("drop-indicator");
+            }
+        }
+
         private readonly LumieCI _lci;
 
         private bool _toggledAllVisible = true;
+        private Component _draggedComponent;
+        private int _dropTargetIndex;
+        private ComponentButton _draggedButton;
 
         public ComponentToolbar(LumieCI lci) : base()
         {
@@ -107,32 +171,39 @@ partial class LumieCI
 
         private ToolbarButton CreateSingleComponentButton(Component c)
         {
-            var button = new ToolbarButton();
+            var button = new ComponentButton(this, c);
 
-            var content = new VisualElement();
-            content.AddToClassList("content");
-
-            // Icon
-            var icon = new Image();
-            icon.image = AssetPreview.GetMiniThumbnail(c);
-
-            // Label
-            var label = new Label(c.GetType().Name);
-
-            // Assemble
-            content.Add(icon);
-            content.Add(label);
-            button.Add(content);
-
-            button.clicked += () => ToggleSelectedSingleComponent(c);
-
-            button.RegisterCallback<MouseDownEvent>(evt =>
+            // Handle move component events
+            button.RegisterCallback<MouseMoveEvent>(evt =>
             {
-                if (evt.button != 1) return; // Right mouse button
+                if (evt.pressedButtons != 1) return;
+                if (_draggedComponent != null) return;
 
-                var mouseRect = new Rect(Event.current.mousePosition, Vector2.zero);
-                EditorContextMenuUtil.Show(mouseRect, c);
+                BeginDrag(c, button);
+                evt.StopPropagation();
+            });
 
+            button.RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                if (_draggedComponent == null) return;
+
+                int hoverIdx = _lci._components.IndexOf(c);
+                if (hoverIdx < 0) return;
+
+                _dropTargetIndex = hoverIdx + 1;
+                button.ShowDropIndicator();
+            });
+
+            button.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                button.HideDropIndicator();
+            });
+
+            button.RegisterCallback<MouseUpEvent>(evt =>
+            {
+                if (_draggedComponent == null) return;
+
+                CommitDrag();
                 evt.StopPropagation();
             });
 
@@ -177,6 +248,67 @@ partial class LumieCI
         private void ToggleSelectedSingleComponent(Component c)
         {
             _lci.ToggleSelectedSingleComponent(c);
+            Refresh();
+        }
+
+        private void BeginDrag(Component c, ComponentButton button)
+        {
+            _dropTargetIndex = _lci._components.IndexOf(c);
+            _draggedComponent = c;
+            _draggedButton = button;
+            button.AddToClassList("button-dragging");
+
+            // Global mouse-up ends the drag regardless of where the pointer lands.
+            this.RegisterCallback<MouseLeaveEvent>(OnMouseLeave);
+        }
+
+        private void OnMouseLeave(MouseLeaveEvent evt) => CancelDrag();
+
+        private void CommitDrag()
+        {
+            if (_draggedComponent != null && _dropTargetIndex >= 0)
+            {
+                int from = _lci._components.IndexOf(_draggedComponent);
+                if (from >= 0 && from != _dropTargetIndex)
+                    MoveComponent(_draggedComponent, from, _dropTargetIndex);
+            }
+
+            EndDrag();
+        }
+
+        private void CancelDrag() => EndDrag();
+
+        private void EndDrag()
+        {
+            _draggedButton?.RemoveFromClassList("button-dragging");
+            _draggedButton?.HideDropIndicator();
+
+            _draggedComponent = null;
+            _draggedButton = null;
+            _dropTargetIndex = -1;
+
+            this.UnregisterCallback<MouseLeaveEvent>(OnMouseLeave);
+        }
+
+        private void MoveComponent(Component component, int fromIndex, int toIndex)
+        {
+            Undo.RecordObject(_lci._targetGO, $"Move {component.GetType().Name}");
+
+            if (toIndex < fromIndex)
+            {
+                // Move up (toward index 0) one step at a time.
+                for (int i = fromIndex; i > toIndex; i--)
+                    UnityEditorInternal.ComponentUtility.MoveComponentUp(component);
+            }
+            else
+            {
+                // Move down one step at a time.
+                for (int i = fromIndex; i < toIndex; i++)
+                    UnityEditorInternal.ComponentUtility.MoveComponentDown(component);
+            }
+
+            _lci.InitComponentList();
+            _lci.InitInspectorStates();
             Refresh();
         }
     }

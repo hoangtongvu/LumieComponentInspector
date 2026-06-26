@@ -54,6 +54,18 @@
     margin-right: 3px;
 }
 
+.toolbar-button > .footer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+}
+
+.toolbar-button > .footer.drop-indicator {
+    background-color: rgb(120, 149, 255);
+}
+
 .toolbar-button .unity-image {
     width: 15px;
     height: 15px;
@@ -62,4 +74,9 @@
 }
 
 .toolbar-button .unity-text-element {
+}
+
+.toolbar-button.button-dragging {
+    opacity: 0.5;
+    rotate: -2deg;
 }
