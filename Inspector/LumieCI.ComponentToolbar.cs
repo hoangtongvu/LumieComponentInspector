@@ -269,8 +269,14 @@ partial class LumieCI
             if (_draggedComponent != null && _dropTargetIndex >= 0)
             {
                 int from = _lci._components.IndexOf(_draggedComponent);
-                if (from >= 0 && from != _dropTargetIndex)
-                    MoveComponent(_draggedComponent, from, _dropTargetIndex);
+                if (from >= 0)
+                {
+                    // Once the dragged item is removed, anything after it shifts up by one.
+                    int to = _dropTargetIndex > from ? _dropTargetIndex - 1 : _dropTargetIndex;
+
+                    if (to != from)
+                        MoveComponent(_draggedComponent, from, to);
+                }
             }
 
             EndDrag();
