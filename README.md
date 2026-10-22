@@ -12,7 +12,7 @@
 - **Create GameObject From Components**: Generate a new GameObject containing selected components from the current selection.
 - **Inject Lumie UI Elements directly to Unity default Inspector**: Works on Unity's default Inspector, no need to modify your existing Editor layout, and feel free to disable Lumie any time if it works unexpectedly.
 
-<img width="745" height="470" alt="image" src="https://github.com/user-attachments/assets/ec582380-ceeb-4b14-b2ae-5d497ba53340" />
+<img width="879" height="532" alt="Capture" src="https://github.com/user-attachments/assets/826cf390-5230-4ee4-afb0-b4e704b71b70" />
 
 ## Installation
 
@@ -23,7 +23,7 @@ To install, paste the following URL into Unity's **Package Manager**:
 3. Select **"Add package from git URL..."**.
 4. Enter the following URL:
 ```bash
-https://github.com/hoangtongvu/LumieComponentInspector.git#1.1.0
+https://github.com/hoangtongvu/LumieComponentInspector.git#1.1.2
 ```
 
 ## Getting Started
