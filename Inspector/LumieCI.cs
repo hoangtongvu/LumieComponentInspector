@@ -33,6 +33,8 @@ internal partial class LumieCI : IDisposable
     // second int: id of the component
     private readonly Dictionary<int, Dictionary<int, ComponentInspectorState>> _cachedInspectorStateByGameObject = new();
 
+    public event Action SelectedComponentsChanged;
+
     [MenuItem(MenuPath)]
     static void Toggle()
     {
@@ -229,12 +231,14 @@ internal partial class LumieCI : IDisposable
 
         _componentInspectorStates[c].IsSelected = isSelected;
         _component2InspectorMap[c].parent.style.display = isSelected ? DisplayStyle.Flex : DisplayStyle.None;
+        SelectedComponentsChanged?.Invoke();
     }
 
     private void SetSelectedSingleComponent(Component c, bool value)
     {
         _componentInspectorStates[c].IsSelected = value;
         _component2InspectorMap[c].parent.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+        SelectedComponentsChanged?.Invoke();
     }
 
     private void SetAllSelected(bool value)
@@ -244,5 +248,7 @@ internal partial class LumieCI : IDisposable
             _componentInspectorStates[c].IsSelected = value;
             _component2InspectorMap[c].parent.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
         }
+
+        SelectedComponentsChanged?.Invoke();
     }
 }

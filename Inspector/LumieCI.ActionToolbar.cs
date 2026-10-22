@@ -28,6 +28,8 @@ partial class LumieCI
             this.styleSheets.Add(_lci._inspectorConfigs.ActionToolbarStyleSheet);
             this.AddToClassList("header");
 
+            this.Add(this.CreateSelectedComponentCountLabel());
+
             // Copy component values button
             this.Add(this.CreateCopyComponentValuesButton());
 
@@ -65,6 +67,28 @@ partial class LumieCI
             });
 
             _hideToastTask.StartingIn(1500);
+        }
+
+        private Label CreateSelectedComponentCountLabel()
+        {
+            var label = new Label("0");
+            label.style.width = _headerHeight * 2;
+            label.style.unityTextAlign = TextAnchor.MiddleCenter;
+
+            _lci.SelectedComponentsChanged += () =>
+            {
+                int total = _lci._components.Count;
+                int selectedCount = 0;
+
+                foreach (var kVPair in _lci._componentInspectorStates)
+                {
+                    if (kVPair.Value.IsSelected) selectedCount++;
+                }
+
+                label.text = $"{selectedCount}/{total}";
+            };
+
+            return label;
         }
 
         private ToolbarButton CreateCopyComponentValuesButton()
