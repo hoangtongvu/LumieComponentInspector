@@ -75,7 +75,7 @@ partial class LumieCI
             label.style.width = _headerHeight * 2;
             label.style.unityTextAlign = TextAnchor.MiddleCenter;
 
-            _lci.SelectedComponentsChanged += () =>
+            _lci.OnSelectedComponentsChanged += () =>
             {
                 int total = _lci._components.Count;
                 int selectedCount = 0;

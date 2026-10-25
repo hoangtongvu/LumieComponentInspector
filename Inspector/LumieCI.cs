@@ -29,11 +29,9 @@ internal partial class LumieCI : IDisposable
     private readonly Dictionary<Component, ComponentInspectorState> _componentInspectorStates = new();
     private readonly List<Component> _copiedComponents = new();
 
-    // first int: id of the game object
-    // second int: id of the component
-    private readonly Dictionary<int, Dictionary<int, ComponentInspectorState>> _cachedInspectorStateByGameObject = new();
+    private readonly Dictionary<EntityId, Dictionary<EntityId, ComponentInspectorState>> _cachedInspectorStateByGameObject = new();
 
-    public event Action SelectedComponentsChanged;
+    public event Action OnSelectedComponentsChanged;
 
     [MenuItem(MenuPath)]
     static void Toggle()
@@ -166,7 +164,7 @@ internal partial class LumieCI : IDisposable
     {
         if (!_targetGO) return;
 
-        var temp = new Dictionary<int, ComponentInspectorState>();
+        var temp = new Dictionary<EntityId, ComponentInspectorState>();
         foreach (var kVPair in _componentInspectorStates)
             temp.Add(kVPair.Key.GetEntityId(), kVPair.Value);
 
@@ -231,14 +229,14 @@ internal partial class LumieCI : IDisposable
 
         _componentInspectorStates[c].IsSelected = isSelected;
         _component2InspectorMap[c].parent.style.display = isSelected ? DisplayStyle.Flex : DisplayStyle.None;
-        SelectedComponentsChanged?.Invoke();
+        OnSelectedComponentsChanged?.Invoke();
     }
 
     private void SetSelectedSingleComponent(Component c, bool value)
     {
         _componentInspectorStates[c].IsSelected = value;
         _component2InspectorMap[c].parent.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
-        SelectedComponentsChanged?.Invoke();
+        OnSelectedComponentsChanged?.Invoke();
     }
 
     private void SetAllSelected(bool value)
@@ -249,6 +247,6 @@ internal partial class LumieCI : IDisposable
             _component2InspectorMap[c].parent.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        SelectedComponentsChanged?.Invoke();
+        OnSelectedComponentsChanged?.Invoke();
     }
 }
